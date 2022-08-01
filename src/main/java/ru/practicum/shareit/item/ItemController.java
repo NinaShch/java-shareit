@@ -28,15 +28,14 @@ public class ItemController {
     public ItemDto changeItem(@PathVariable Long itemId,
                               @RequestHeader("X-Sharer-User-Id") Long userId,
                               @RequestBody ItemDto itemDto) {
-        log.info("Request to change ");
+        log.info("Request to change item {}", itemDto);
         return itemService.changeItem(itemId, userId, itemDto);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemInfo(@PathVariable Long itemId,
-                               @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ItemDto getItemInfo(@PathVariable Long itemId) {
         log.info("Request item info by id, id = {}", itemId);
-        return itemService.getItemInfo(itemId, userId);
+        return itemService.getItemInfo(itemId);
     }
 
     @GetMapping
@@ -46,9 +45,9 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> getFreeItems(@RequestParam String text,
-                                            @RequestHeader("X-Sharer-User-Id") Long userId) {
-        log.info("user id = {} finds item by keyword {}", userId, text);
+    public Collection<ItemDto> getFreeItems(@RequestParam String text) {
+        //Было в ТЗ - "Проверьте, что поиск возвращает только доступные для аренды вещи"
+        log.info("user finds item by keyword {}", text);
         return itemService.getItemsByKeyword(text);
     }
 }

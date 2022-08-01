@@ -5,8 +5,6 @@ import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.UserBadRequestException;
 import ru.practicum.shareit.exception.UserDataConflictException;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.*;
 
@@ -22,13 +20,11 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User add(UserDto userDto) {
-        if (userDto.getEmail() == null || userDto.getName() == null)
-            throw new UserBadRequestException("Attempt to add user with empty fields");
-        if (usersMap.values().stream().noneMatch(user -> Objects.equals(userDto.getEmail(), user.getEmail()))) {
+    public User add(User user) {
+        if (usersMap.values().stream().noneMatch(u -> Objects.equals(user.getEmail(), u.getEmail()))) {
             Long userId = getNextId();
-            log.info("New user added, userId = {}, user = {}", userId, userDto);
-            User user = UserMapper.toUser(userDto, userId);
+            log.info("New user added, userId = {}, user = {}", userId, user);
+            user.setId(userId);
             usersMap.put(userId, user);
             return user;
         } else {
@@ -37,14 +33,14 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User update(UserDto userDto, Long userId) {
+    public User update(User user, Long userId) {
         if (!usersMap.containsKey(userId)) throw new UserBadRequestException("Attempt to update user with absent id");
         if (usersMap.values().stream()
-                .filter(user -> !Objects.equals(user.getId(), userId))
-                .anyMatch(user -> Objects.equals(userDto.getEmail(), user.getEmail())))
+                .filter(u -> !Objects.equals(u.getId(), userId))
+                .anyMatch(u -> Objects.equals(user.getEmail(), u.getEmail())))
             throw new UserDataConflictException("Attempt to update user email where email is already exists");
         User userUpdate = usersMap.get(userId);
-        User user = UserMapper.toUser(userDto, userId);
+        user.setId(userId);
         if (user.getName() == null) user.setName(userUpdate.getName());
         if (user.getEmail() == null) user.setEmail(userUpdate.getEmail());
         usersMap.put(userId, user);
@@ -66,6 +62,8 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public Optional<User> getById(Long id) {
-        return Optional.ofNullable(usersMap.get(id));
+        User user = usersMap.get(id);
+        if (user != null) return Optional.of(user);
+        else return Optional.empty();
     }
 }

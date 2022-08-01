@@ -3,8 +3,6 @@ package ru.practicum.shareit.item.storage;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exception.ItemBadRequestException;
 import ru.practicum.shareit.exception.ItemNotFoundException;
-import ru.practicum.shareit.item.ItemMapper;
-import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
@@ -20,49 +18,38 @@ public class InMemoryItemStorage implements ItemStorage {
     }
 
     @Override
-    public ItemDto getItemInfo(Long itemId, Long userId) {
-        return ItemMapper.toItemDto(itemMap.get(itemId));
+    public Item getItemInfo(Long itemId) {
+        return itemMap.get(itemId);
     }
 
     @Override
-    public ItemDto add(ItemDto itemDto, Long userId) {
-        if (itemDto.getName() == null || itemDto.getDescription() == null || itemDto.getAvailable() == null)
-            throw new ItemBadRequestException("Attempt add item with absent fields");
-        if (itemDto.getName().isBlank() || itemDto.getDescription().isBlank())
-            throw new ItemBadRequestException("Attempt add item with absent fields");
+    public Item add(Item item) {
         Long itemId = getNextId();
-        itemDto.setId(itemId);
-        Item item = ItemMapper.toItem(itemDto);
-        item.setOwner(userId);
+        item.setId(itemId);
         itemMap.put(itemId, item);
-        return itemDto;
+        return item;
     }
 
     @Override
-    public ItemDto change(Long itemId, Long userId, ItemDto itemDto) {
+    public Item change(Long itemId, Long userId, Item itemUpdate) {
         if (!itemMap.containsKey(itemId)) throw new ItemBadRequestException("Attempt update item with wrong id");
-        if (itemDto.getId() != null && !Objects.equals(itemDto.getId(), itemId))
-            throw new ItemBadRequestException("Attempt update item by id where id is not as in itemDto");
         Item item = itemMap.get(itemId);
-        if (!Objects.equals(item.getOwner(), userId))
+        if (!Objects.equals(item.getOwner().getId(), userId))
             throw new ItemNotFoundException("Attempt update item other user");
-        if (itemDto.getName() != null) item.setName(itemDto.getName());
-        if (itemDto.getDescription() != null) item.setDescription(itemDto.getDescription());
-        if (itemDto.getAvailable() != null) item.setAvailable(itemDto.getAvailable());
+        if (itemUpdate.getName() != null) item.setName(itemUpdate.getName());
+        if (itemUpdate.getDescription() != null) item.setDescription(itemUpdate.getDescription());
+        if (itemUpdate.getAvailable() != null) item.setAvailable(itemUpdate.getAvailable());
         itemMap.put(itemId, item);
-        return ItemMapper.toItemDto(item);
+        return item;
     }
 
     @Override
-    public Collection<ItemDto> getById(Long userId) {
-        return itemMap.values().stream()
-                .filter(item -> Objects.equals(item.getOwner(), userId))
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+    public Collection<Item> getById(Long userId) {
+        return itemMap.values();
     }
 
     @Override
-    public Collection<ItemDto> getByKeyWords(String text) {
+    public Collection<Item> getByKeyWords(String text) {
         if (text.isBlank()) return List.of();
         return itemMap.values().stream()
                 .filter(item ->
@@ -70,7 +57,6 @@ public class InMemoryItemStorage implements ItemStorage {
                                 item.getDescription().toLowerCase().contains(text.toLowerCase())
                 )
                 .filter(item -> item.getAvailable().equals(true))
-                .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 }
