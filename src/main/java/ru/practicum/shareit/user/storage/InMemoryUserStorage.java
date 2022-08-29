@@ -2,9 +2,9 @@ package ru.practicum.shareit.user.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exception.UserBadRequestException;
-import ru.practicum.shareit.exception.UserDataConflictException;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.ConflictException;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
 
@@ -28,17 +28,17 @@ public class InMemoryUserStorage implements UserStorage {
             usersMap.put(userId, user);
             return user;
         } else {
-            throw new UserDataConflictException("Attempt to create user with existing email");
+            throw new ConflictException("Attempt to create user with existing email");
         }
     }
 
     @Override
     public User update(User user, Long userId) {
-        if (!usersMap.containsKey(userId)) throw new UserBadRequestException("Attempt to update user with absent id");
+        if (!usersMap.containsKey(userId)) throw new BadRequestException("Attempt to update user with absent id");
         if (usersMap.values().stream()
                 .filter(u -> !Objects.equals(u.getId(), userId))
                 .anyMatch(u -> Objects.equals(user.getEmail(), u.getEmail())))
-            throw new UserDataConflictException("Attempt to update user email where email is already exists");
+            throw new ConflictException("Attempt to update user email where email is already exists");
         User userUpdate = usersMap.get(userId);
         user.setId(userId);
         if (user.getName() == null) user.setName(userUpdate.getName());
@@ -55,7 +55,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void deleteById(Long userId) {
-        if (!usersMap.containsKey(userId)) throw new UserBadRequestException("Attempt to delete user with absent id");
+        if (!usersMap.containsKey(userId)) throw new BadRequestException("Attempt to delete user with absent id");
         usersMap.remove(userId);
         log.info("user id = {} is deleted", userId);
     }

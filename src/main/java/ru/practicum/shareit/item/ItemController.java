@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 
 import java.util.Collection;
@@ -18,8 +19,10 @@ public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ItemDto addNewItem(@RequestBody ItemDto itemDto,
-                          @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ItemDto addNewItem(
+            @RequestBody ItemDto itemDto,
+            @RequestHeader("X-Sharer-User-Id") Long userId
+    ) {
         log.info("Request to add new item {} by user id = {}", itemDto, userId);
         return itemService.addNewItem(itemDto, userId);
     }
@@ -33,9 +36,12 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemInfo(@PathVariable Long itemId) {
+    public ItemDto getItemInfo(
+            @PathVariable Long itemId,
+            @RequestHeader("X-Sharer-User-Id") Long userId
+    ) {
         log.info("Request item info by id, id = {}", itemId);
-        return itemService.getItemInfo(itemId);
+        return itemService.getItemInfo(itemId, userId);
     }
 
     @GetMapping
@@ -46,8 +52,18 @@ public class ItemController {
 
     @GetMapping("/search")
     public Collection<ItemDto> getFreeItems(@RequestParam String text) {
-        //Было в ТЗ - "Проверьте, что поиск возвращает только доступные для аренды вещи"
         log.info("user finds item by keyword {}", text);
         return itemService.getItemsByKeyword(text);
     }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto postComment(
+            @PathVariable Long itemId,
+            @RequestHeader("X-Sharer-User-Id") Long authorId,
+            @RequestBody CommentDto commentDto
+    ) {
+        log.info("postComment, id = {}, comment = {}, userId = {}", itemId, commentDto.getText(), authorId);
+        return itemService.postComment(itemId, authorId, commentDto);
+    }
+
 }

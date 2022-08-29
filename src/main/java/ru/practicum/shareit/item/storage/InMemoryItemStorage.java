@@ -1,8 +1,8 @@
 package ru.practicum.shareit.item.storage;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exception.ItemBadRequestException;
-import ru.practicum.shareit.exception.ItemNotFoundException;
+import ru.practicum.shareit.exception.BadRequestException;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
@@ -32,10 +32,10 @@ public class InMemoryItemStorage implements ItemStorage {
 
     @Override
     public Item change(Long itemId, Long userId, Item itemUpdate) {
-        if (!itemMap.containsKey(itemId)) throw new ItemBadRequestException("Attempt update item with wrong id");
+        if (!itemMap.containsKey(itemId)) throw new BadRequestException("Attempt update item with wrong id");
         Item item = itemMap.get(itemId);
         if (!Objects.equals(item.getOwner().getId(), userId))
-            throw new ItemNotFoundException("Attempt update item other user");
+            throw new NotFoundException("Attempt update item other user");
         if (itemUpdate.getName() != null) item.setName(itemUpdate.getName());
         if (itemUpdate.getDescription() != null) item.setDescription(itemUpdate.getDescription());
         if (itemUpdate.getAvailable() != null) item.setAvailable(itemUpdate.getAvailable());
