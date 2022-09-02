@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
-public class BookingDto {
+public class BookingInputDto {
     @NotNull
     private Long itemId;
     private LocalDateTime start;

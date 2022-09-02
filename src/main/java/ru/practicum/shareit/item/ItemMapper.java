@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item;
 
-import ru.practicum.shareit.booking.dto.ExtremumBookingDto;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
@@ -13,8 +12,8 @@ public class ItemMapper {
     public static ItemDto toItemDto(
             Item item,
             List<CommentDto> comments,
-            ExtremumBookingDto lastBooking,
-            ExtremumBookingDto nextBooking
+            ItemDto.ExtremumBookingDto lastBooking,
+            ItemDto.ExtremumBookingDto nextBooking
    ) {
         return new ItemDto(
                 item.getId(),

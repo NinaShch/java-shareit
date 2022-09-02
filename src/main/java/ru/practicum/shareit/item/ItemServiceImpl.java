@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
-import ru.practicum.shareit.booking.dto.ExtremumBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.ForbiddenException;
@@ -15,6 +14,7 @@ import ru.practicum.shareit.item.comment.dto.CommentDto;
 import ru.practicum.shareit.item.comment.model.Comment;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -145,7 +145,7 @@ public class ItemServiceImpl implements ItemService {
                 .anyMatch((booking) -> booking.getEnd().isBefore(LocalDateTime.now()));
     }
 
-    private ExtremumBookingDto getLastBooking(Item item, Long userId) {
+    private ItemDto.ExtremumBookingDto getLastBooking(Item item, Long userId) {
         if (!item.getOwner().getId().equals(userId)) return null;
         List<Booking> bookings = bookingRepository.findByItemAndEndIsBefore(item, LocalDateTime.now());
         if (bookings.isEmpty()) {
@@ -154,7 +154,7 @@ public class ItemServiceImpl implements ItemService {
         return BookingMapper.toExtremumBookingDto(bookings.get(bookings.size() - 1));
     }
 
-    private ExtremumBookingDto getNextBooking(Item item, Long userId) {
+    private ItemDto.ExtremumBookingDto getNextBooking(Item item, Long userId) {
         if (!item.getOwner().getId().equals(userId)) return null;
         List<Booking> bookings = bookingRepository.findByItemAndStartIsAfter(item, LocalDateTime.now());
         if (bookings.isEmpty()) {

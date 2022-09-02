@@ -2,13 +2,13 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.Status;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.storage.ItemRepository;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -23,23 +23,23 @@ public class BookingService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
 
-    public Booking addNewBooking(BookingDto bookingDto, Long userId) {
-            Item item = itemRepository.findById(bookingDto.getItemId())
+    public Booking addNewBooking(BookingInputDto bookingInputDto, Long userId) {
+            Item item = itemRepository.findById(bookingInputDto.getItemId())
                     .orElseThrow(() -> new NotFoundException("item not found"));
             if (!item.getAvailable())
                 throw new BadRequestException("item not available");
             if (userId.equals(itemRepository.getItemOwner(item.getId()).getId())) {
                 throw new NotFoundException("can't book own item");
             }
-            verifyNotInPast(bookingDto.getStart());
-            verifyNotInPast(bookingDto.getEnd());
-            if (bookingDto.getEnd().isBefore(bookingDto.getStart())) {
+            verifyNotInPast(bookingInputDto.getStart());
+            verifyNotInPast(bookingInputDto.getEnd());
+            if (bookingInputDto.getEnd().isBefore(bookingInputDto.getStart())) {
                 throw new BadRequestException("booking end is before start");
             }
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new NotFoundException("user not found"));
         try {
-            Booking booking = BookingMapper.toBooking(bookingDto, null, item, user, Status.WAITING);
+            Booking booking = BookingMapper.toBooking(bookingInputDto, null, item, user, Status.WAITING);
             bookingRepository.save(booking);
             return booking;
         } catch (Exception e) {
@@ -80,7 +80,7 @@ public class BookingService {
         return booking;
     }
 
-    public List<Booking> getAllBookings(Long bookerId, BookingGetState state) {
+    public List<Booking> getAllBookings(Long bookerId, BookingState state) {
         User booker = getUser(bookerId);
 
         switch (state) {
@@ -101,7 +101,7 @@ public class BookingService {
         throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
     }
 
-    public List<Booking> getAllBookingsForOwner(Long ownerId, BookingGetState state) {
+    public List<Booking> getAllBookingsForOwner(Long ownerId, BookingState state) {
         User owner = getUser(ownerId);
         List<Item> items = itemRepository.findByOwner(owner);
 
@@ -111,7 +111,7 @@ public class BookingService {
                 .collect(Collectors.toList());
     }
 
-    public List<Booking> getAllBookingsForItem(Item item, BookingGetState state) {
+    public List<Booking> getAllBookingsForItem(Item item, BookingState state) {
         switch (state) {
             case ALL:
                 return bookingRepository.findByItem(item);
