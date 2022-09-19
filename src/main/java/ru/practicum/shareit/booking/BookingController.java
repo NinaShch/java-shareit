@@ -48,13 +48,16 @@ public class BookingController {
     @GetMapping
     public List<BookingOutputDto> getAllBookings(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(defaultValue = "ALL", required = false) String state
+            @RequestParam(defaultValue = "ALL", required = false) String state,
+            @RequestParam(required = false) Integer from,
+            @RequestParam(required = false) Integer size
     ) {
         log.info("Request all bookings, userId = {}, state = {}", userId, state);
         try {
             BookingState bookingState = state != null ? BookingState.valueOf(state) : BookingState.ALL;
-            return bookingService.getAllBookings(userId, bookingState).stream()
-                    .sorted(new BookingDateComparator().reversed())
+            return bookingService
+                    .getAllBookings(userId, bookingState, from, size)
+                    .stream()
                     .map(BookingMapper::toBookingOutputDto)
                     .collect(Collectors.toList());
         } catch (IllegalArgumentException e) {
@@ -65,13 +68,16 @@ public class BookingController {
     @GetMapping("owner")
     public List<BookingOutputDto> getAllBookingsForOwner(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(defaultValue = "ALL", required = false) String state
+            @RequestParam(defaultValue = "ALL", required = false) String state,
+            @RequestParam(required = false) Integer from,
+            @RequestParam(required = false) Integer size
     ) {
         log.info("Request all bookings for owner, userId = {}, state = {}", userId, state);
         try {
             BookingState bookingState = state != null ? BookingState.valueOf(state) : BookingState.ALL;
-            return bookingService.getAllBookingsForOwner(userId, bookingState).stream()
-                    .sorted(new BookingDateComparator().reversed())
+            return bookingService
+                    .getAllBookingsForOwner(userId, bookingState, from, size)
+                    .stream()
                     .map(BookingMapper::toBookingOutputDto)
                     .collect(Collectors.toList());
         } catch (IllegalArgumentException e) {

@@ -1,6 +1,8 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -15,6 +17,9 @@ import ru.practicum.shareit.item.comment.model.Comment;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.storage.ItemRepository;
+import ru.practicum.shareit.paging.OffsetLimitPageable;
+import ru.practicum.shareit.requests.model.ItemRequest;
+import ru.practicum.shareit.requests.storage.ItemRequestRepository;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -29,6 +34,7 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
     public ItemDto getItemInfo(Long itemId, Long userId) {
@@ -49,7 +55,9 @@ public class ItemServiceImpl implements ItemService {
             throw new BadRequestException("Attempt add item with absent fields");
         if (itemDto.getName().isBlank() || itemDto.getDescription().isBlank())
             throw new BadRequestException("Attempt add item with absent fields");
-        Item item = itemRepository.save(ItemMapper.toItem(itemDto, user.get(), null));
+        Long requestId = itemDto.getRequestId();
+        ItemRequest itemRequest = requestId != null ? itemRequestRepository.findById(requestId).orElse(null) : null;
+        Item item = itemRepository.save(ItemMapper.toItem(itemDto, user.get(), itemRequest));
         return ItemMapper.toItemDto(item,
                 getComments(item.getId()),
                 getLastBooking(item, userId),
@@ -83,23 +91,22 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemDto> getItemsByUserId(Long userId) {
+    public Collection<ItemDto> getItemsByUserId(Long userId, Integer from, Integer size) {
+        Pageable pageable = OffsetLimitPageable.from(from, size, Sort.by(Sort.Direction.ASC, "id"));
         User user = getUser(userId);
-        return itemRepository.findByOwner(user).stream()
-                .filter(item -> Objects.equals(item.getOwner().getId(), userId))
+        return itemRepository.findByOwner(user, pageable).stream()
                 .map(item -> ItemMapper.toItemDto(item,
                         getComments(item.getId()),
                         getLastBooking(item, item.getOwner().getId()),
                         getNextBooking(item, item.getOwner().getId())))
-                .sorted(Comparator.comparing(ItemDto::getId))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Collection<ItemDto> getItemsByKeyword(String text) {
+    public Collection<ItemDto> getItemsByKeyword(String text, Integer from, Integer size) {
+        Pageable pageable = OffsetLimitPageable.from(from, size, Sort.by(Sort.Direction.ASC, "id"));
         if (text.isBlank()) return new ArrayList<>();
-        return itemRepository.search(text.toLowerCase()).stream()
-                .filter(Item::getAvailable)
+        return itemRepository.search(text.toLowerCase(), pageable).stream()
                 .map(item -> ItemMapper.toItemDto(item,
                         getComments(item.getId()),
                         getLastBooking(item, item.getOwner().getId()),
