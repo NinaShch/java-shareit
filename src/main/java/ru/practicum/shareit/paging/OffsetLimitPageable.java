@@ -5,7 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.exception.BadRequestException;
 
-public class OffsetLimitPageable extends PageRequest implements Pageable  {
+public class OffsetLimitPageable extends PageRequest {
 
     private static final int MAX_PAGE_SIZE = Integer.MAX_VALUE;
 

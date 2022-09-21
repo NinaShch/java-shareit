@@ -27,27 +27,23 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking addNewBooking(BookingInputDto bookingInputDto, Long userId) {
-            Item item = itemRepository.findById(bookingInputDto.getItemId())
-                    .orElseThrow(() -> new NotFoundException("item not found"));
-            if (!item.getAvailable())
-                throw new BadRequestException("item not available");
-            if (userId.equals(itemRepository.getItemOwner(item.getId()).getId())) {
-                throw new NotFoundException("can't book own item");
-            }
-            verifyNotInPast(bookingInputDto.getStart());
-            verifyNotInPast(bookingInputDto.getEnd());
-            if (bookingInputDto.getEnd().isBefore(bookingInputDto.getStart())) {
-                throw new BadRequestException("booking end is before start");
-            }
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new NotFoundException("user not found"));
-        try {
-            Booking booking = BookingMapper.toBooking(bookingInputDto, null, item, user, Status.WAITING);
-            bookingRepository.save(booking);
-            return booking;
-        } catch (Exception e) {
-            throw new NotFoundException(e.getMessage());
+        Item item = itemRepository.findById(bookingInputDto.getItemId())
+                .orElseThrow(() -> new NotFoundException("item not found"));
+        if (!item.getAvailable())
+            throw new BadRequestException("item not available");
+        if (userId.equals(itemRepository.getItemOwner(item.getId()).getId())) {
+            throw new NotFoundException("can't book own item");
         }
+        verifyNotInPast(bookingInputDto.getStart());
+        verifyNotInPast(bookingInputDto.getEnd());
+        if (bookingInputDto.getEnd().isBefore(bookingInputDto.getStart())) {
+            throw new BadRequestException("booking end is before start");
+        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("user not found"));
+        Booking booking = BookingMapper.toBooking(bookingInputDto, null, item, user, Status.WAITING);
+        bookingRepository.save(booking);
+        return booking;
     }
 
     @Override

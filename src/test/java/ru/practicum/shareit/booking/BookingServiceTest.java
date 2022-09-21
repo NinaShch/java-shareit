@@ -188,17 +188,6 @@ public class BookingServiceTest {
     }
 
     @Test
-    public void not_found_when_repository_exception_on_add() {
-        assertThrows(
-                NotFoundException.class,
-                () -> {
-                    when(bookingRepository.save(any())).thenThrow(new RuntimeException());
-                    underTest.addNewBooking(input, BOOKER_ID);
-                }
-        );
-    }
-
-    @Test
     public void returned_correctly_when_added() {
         Booking result = underTest.addNewBooking(input, BOOKER_ID);
 
