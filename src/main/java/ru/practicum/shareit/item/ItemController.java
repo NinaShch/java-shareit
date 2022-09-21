@@ -54,8 +54,8 @@ public class ItemController {
 
     @GetMapping("/search")
     public Collection<ItemDto> getItemsByKeyword(@RequestParam String text,
-                                                 @RequestParam(required = false) Integer from,
-                                                 @RequestParam(required = false) Integer size) {
+                                                 @RequestParam(required = false, defaultValue = "") Integer from,
+                                                 @RequestParam(required = false, defaultValue = "") Integer size) {
         log.info("user finds item by keyword {}", text);
         return itemService.getItemsByKeyword(text, from, size);
     }

@@ -92,7 +92,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> getItemsByUserId(Long userId, Integer from, Integer size) {
-        Pageable pageable = OffsetLimitPageable.from(from, size, Sort.by(Sort.Direction.ASC, "id"));
+        Pageable pageable = OffsetLimitPageable.create(from, size, Sort.by(Sort.Direction.ASC, "id"));
         User user = getUser(userId);
         return itemRepository.findByOwner(user, pageable).stream()
                 .map(item -> ItemMapper.toItemDto(item,
@@ -104,7 +104,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> getItemsByKeyword(String text, Integer from, Integer size) {
-        Pageable pageable = OffsetLimitPageable.from(from, size, Sort.by(Sort.Direction.ASC, "id"));
+        Pageable pageable = OffsetLimitPageable.create(from, size, Sort.by(Sort.Direction.ASC, "id"));
         if (text.isBlank()) return new ArrayList<>();
         return itemRepository.search(text.toLowerCase(), pageable).stream()
                 .map(item -> ItemMapper.toItemDto(item,

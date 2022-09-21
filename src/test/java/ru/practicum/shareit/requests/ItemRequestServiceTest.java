@@ -35,7 +35,7 @@ import static org.springframework.test.util.AssertionErrors.*;
 public class ItemRequestServiceTest {
 
     @InjectMocks
-    private ItemRequestService underTest;
+    private ItemRequestServiceImpl underTest;
 
     @Mock
     private UserRepository userRepository;

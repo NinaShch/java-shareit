@@ -1,19 +1,21 @@
 package ru.practicum.shareit.paging;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import ru.practicum.shareit.exception.BadRequestException;
 
-public class OffsetLimitPageable implements Pageable {
+public class OffsetLimitPageable extends PageRequest implements Pageable  {
 
     private static final int MAX_PAGE_SIZE = Integer.MAX_VALUE;
 
-    private final int from;
+    private final int offset;
     private final int size;
     private final Sort sort;
 
-    private OffsetLimitPageable(int from, int size, Sort sort) {
-        this.from = from;
+    private OffsetLimitPageable(int offset, int size, Sort sort) {
+        super(0, size, sort);
+        this.offset = offset;
         this.size = size;
         this.sort = sort;
     }
@@ -24,38 +26,28 @@ public class OffsetLimitPageable implements Pageable {
     }
 
     @Override
-    public int getPageSize() {
-        return size;
-    }
-
-    @Override
     public long getOffset() {
-        return from;
+        return offset;
     }
 
     @Override
-    public Sort getSort() {
-        return sort;
-    }
-
-    @Override
-    public Pageable next() {
-        return new OffsetLimitPageable(from + size, size, sort);
+    public PageRequest next() {
+        return new OffsetLimitPageable(offset + size, size, sort);
     }
 
     @Override
     public Pageable previousOrFirst() {
-        return new OffsetLimitPageable(from, size, sort);
+        return new OffsetLimitPageable(offset, size, sort);
     }
 
     @Override
-    public Pageable first() {
-        return new OffsetLimitPageable(from, size, sort);
+    public PageRequest first() {
+        return new OffsetLimitPageable(offset, size, sort);
     }
 
     @Override
-    public Pageable withPage(int pageNumber) {
-        return new OffsetLimitPageable(from + size * pageNumber, size, sort);
+    public PageRequest withPage(int pageNumber) {
+        return new OffsetLimitPageable(offset + size * pageNumber, size, sort);
     }
 
     @Override
@@ -63,16 +55,16 @@ public class OffsetLimitPageable implements Pageable {
         return false;
     }
 
-    public static Pageable from(Integer from, Integer size) {
-        return from(from, size, Sort.unsorted());
+    public static Pageable create(Integer offset, Integer size) {
+        return create(offset, size, Sort.unsorted());
     }
 
-    public static Pageable from(Integer from, Integer size, Sort sort) {
-        if (from == null && size == null) {
+    public static Pageable create(Integer offset, Integer size, Sort sort) {
+        if (offset == null && size == null) {
             return unpaged(sort);
         }
-        validatePaging(from, size);
-        return new OffsetLimitPageable(from, size, sort);
+        validatePaging(offset, size);
+        return new OffsetLimitPageable(offset, size, sort);
     }
 
     public static Pageable unpaged(Sort sort) {

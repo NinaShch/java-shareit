@@ -53,16 +53,13 @@ public class BookingController {
             @RequestParam(required = false) Integer size
     ) {
         log.info("Request all bookings, userId = {}, state = {}", userId, state);
-        try {
-            BookingState bookingState = state != null ? BookingState.valueOf(state) : BookingState.ALL;
-            return bookingService
-                    .getAllBookings(userId, bookingState, from, size)
-                    .stream()
-                    .map(BookingMapper::toBookingOutputDto)
-                    .collect(Collectors.toList());
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
-        }
+        BookingState bookingState = BookingState.optionalValueOf(state).orElseThrow(
+                () -> new BadRequestException("Unknown state: UNSUPPORTED_STATUS"));
+        return bookingService
+                .getAllBookings(userId, bookingState, from, size)
+                .stream()
+                .map(BookingMapper::toBookingOutputDto)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("owner")

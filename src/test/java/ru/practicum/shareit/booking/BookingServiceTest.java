@@ -45,7 +45,7 @@ public class BookingServiceTest {
     private static final LocalDateTime END = LocalDateTime.of(2033, 1, 1, 0, 0);
 
     @InjectMocks
-    private BookingService underTest;
+    private BookingServiceImpl underTest;
 
     @Mock
     private BookingRepository bookingRepository;

@@ -12,24 +12,24 @@ public class OffsetLimitPageableTest {
 
     @Test
     public void successful_validation_without_paging() {
-        OffsetLimitPageable.from(null, null);
+        OffsetLimitPageable.create(null, null);
     }
 
     @Test
     public void successful_validation_with_positive_arguments() {
-        OffsetLimitPageable.from(1, 2);
+        OffsetLimitPageable.create(1, 2);
     }
 
     @Test
     public void successful_validation_with_zero_from() {
-        OffsetLimitPageable.from(0, 2);
+        OffsetLimitPageable.create(0, 2);
     }
 
     @Test
     public void failed_validation_with_zero_size() {
         assertThrows(
                 BadRequestException.class,
-                () -> OffsetLimitPageable.from(1, 0)
+                () -> OffsetLimitPageable.create(1, 0)
         );
     }
 
@@ -37,7 +37,7 @@ public class OffsetLimitPageableTest {
     public void failed_validation_with_negative_size() {
         assertThrows(
                 BadRequestException.class,
-                () -> OffsetLimitPageable.from(1, -1)
+                () -> OffsetLimitPageable.create(1, -1)
         );
     }
 
@@ -45,7 +45,7 @@ public class OffsetLimitPageableTest {
     public void failed_validation_with_negative_from() {
         assertThrows(
                 BadRequestException.class,
-                () -> OffsetLimitPageable.from(-1, 2)
+                () -> OffsetLimitPageable.create(-1, 2)
         );
     }
 
@@ -53,7 +53,7 @@ public class OffsetLimitPageableTest {
     public void failed_validation_with_only_from() {
         assertThrows(
                 BadRequestException.class,
-                () -> OffsetLimitPageable.from(1, null)
+                () -> OffsetLimitPageable.create(1, null)
         );
     }
 
@@ -61,7 +61,7 @@ public class OffsetLimitPageableTest {
     public void failed_validation_with_only_size() {
         assertThrows(
                 BadRequestException.class,
-                () -> OffsetLimitPageable.from(null, 1)
+                () -> OffsetLimitPageable.create(null, 1)
         );
     }
 
@@ -71,7 +71,7 @@ public class OffsetLimitPageableTest {
         int size = 10;
         Sort sort = mock(Sort.class);
 
-        Pageable pageable = OffsetLimitPageable.from(from, size, sort);
+        Pageable pageable = OffsetLimitPageable.create(from, size, sort);
         assertEquals(0, pageable.getPageNumber());
         assertEquals(size, pageable.getPageSize());
         assertEquals(from, pageable.getOffset());
