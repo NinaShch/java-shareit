@@ -15,6 +15,7 @@ public class ItemMapper {
             ItemDto.ExtremumBookingDto lastBooking,
             ItemDto.ExtremumBookingDto nextBooking
    ) {
+        ItemRequest itemRequest = item.getRequest();
         return new ItemDto(
                 item.getId(),
                 item.getName(),
@@ -22,7 +23,8 @@ public class ItemMapper {
                 item.getAvailable(),
                 comments,
                 lastBooking,
-                nextBooking
+                nextBooking,
+                itemRequest != null ? itemRequest.getId() : null
         );
     }
 

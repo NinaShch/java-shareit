@@ -5,11 +5,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingInputDto;
 import ru.practicum.shareit.booking.dto.BookingOutputDto;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.BadRequestException;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -48,32 +48,29 @@ public class BookingController {
     @GetMapping
     public List<BookingOutputDto> getAllBookings(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(defaultValue = "ALL", required = false) String state
+            @RequestParam(defaultValue = "ALL", required = false) String state,
+            @RequestParam(required = false) Integer from,
+            @RequestParam(required = false) Integer size
     ) {
         log.info("Request all bookings, userId = {}, state = {}", userId, state);
-        try {
-            BookingState bookingState = state != null ? BookingState.valueOf(state) : BookingState.ALL;
-            return bookingService.getAllBookings(userId, bookingState).stream()
-                    .sorted(new BookingDateComparator().reversed())
-                    .map(BookingMapper::toBookingOutputDto)
-                    .collect(Collectors.toList());
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
-        }
+        BookingState bookingState = BookingState.optionalValueOf(state).orElseThrow(
+                () -> new BadRequestException("Unknown state: UNSUPPORTED_STATUS"));
+        List<Booking> bookings = bookingService.getAllBookings(userId, bookingState, from, size);
+        return BookingMapper.toBookingOutputDtoList(bookings);
     }
 
     @GetMapping("owner")
     public List<BookingOutputDto> getAllBookingsForOwner(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(defaultValue = "ALL", required = false) String state
+            @RequestParam(defaultValue = "ALL", required = false) String state,
+            @RequestParam(required = false) Integer from,
+            @RequestParam(required = false) Integer size
     ) {
         log.info("Request all bookings for owner, userId = {}, state = {}", userId, state);
         try {
             BookingState bookingState = state != null ? BookingState.valueOf(state) : BookingState.ALL;
-            return bookingService.getAllBookingsForOwner(userId, bookingState).stream()
-                    .sorted(new BookingDateComparator().reversed())
-                    .map(BookingMapper::toBookingOutputDto)
-                    .collect(Collectors.toList());
+            List<Booking> bookings = bookingService.getAllBookingsForOwner(userId, bookingState, from, size);
+            return BookingMapper.toBookingOutputDtoList(bookings);
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Unknown state: UNSUPPORTED_STATUS");
         }
