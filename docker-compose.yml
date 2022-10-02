@@ -1,28 +1,49 @@
 version: '3.8'
 services:
   gateway:
-    build:
-    image:
+    build: ./gateway
+#    image:
+#      amazoncorretto:11-alpine-jdk
     container_name:
+      shareIt-gateway
     ports:
       - "8080:8080"
     depends_on:
+      - db
+      - server
     environment:
       - SHAREIT_SERVER_URL=http://server:9090
+#      - TZ=Europe/Moscow
 
   server:
-    build:
-    image:
+    build: ./server
+#    image:
+#      amazoncorretto:11-alpine-jdk
     container_name:
+      shareIt-server
     ports:
       - "9090:9090"
     depends_on:
+      - db
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shareit
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+#      - TZ=Europe/Moscow
 
   db:
-    image:
+    image: postgres:14.4-alpine
+
     container_name:
+      postgresql
     ports:
       - "6541:5432"
+    volumes:
+      - /var/lib/postgresql/data/
     environment:
+      - POSTGRES_DB=shareit
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=shareit

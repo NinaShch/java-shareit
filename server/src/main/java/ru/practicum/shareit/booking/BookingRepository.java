@@ -60,4 +60,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @SortComparator(BookingDateComparator.class)
     List<Booking> findByItemAndStartIsAfter(Item item, LocalDateTime start);
 
+    @SortComparator(BookingDateComparator.class)
+    @Query("select b from Booking b, Item i where b.item = i and b.end <= current_timestamp")
+    List<Booking> findByItemAndEndIsInPast(Item item);
+
+    @SortComparator(BookingDateComparator.class)
+    @Query("select b from Booking b, Item i where b.item = i and b.start >= current_timestamp")
+    List<Booking> findByItemAndStartIsInFuture(Item item);
+
 }

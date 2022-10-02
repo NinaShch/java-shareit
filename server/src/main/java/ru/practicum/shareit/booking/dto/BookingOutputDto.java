@@ -19,5 +19,4 @@ public class BookingOutputDto {
     private Item item;
     private User booker;
     private Status status;
-
 }
