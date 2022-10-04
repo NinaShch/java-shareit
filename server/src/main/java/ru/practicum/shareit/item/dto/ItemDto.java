@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Data
@@ -24,7 +23,6 @@ public class ItemDto {
     @Data
     @AllArgsConstructor
     public static class ExtremumBookingDto {
-        @NotNull
         private Long id;
         private Long bookerId;
     }

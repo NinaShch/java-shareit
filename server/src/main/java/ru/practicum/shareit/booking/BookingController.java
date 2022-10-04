@@ -8,7 +8,6 @@ import ru.practicum.shareit.booking.dto.BookingOutputDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.exception.BadRequestException;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -21,7 +20,7 @@ public class BookingController {
 
     @PostMapping
     public BookingOutputDto createBooking(
-            @Valid @RequestBody BookingInputDto bookingInputDto,
+            @RequestBody BookingInputDto bookingInputDto,
             @RequestHeader("X-Sharer-User-Id") Long userId
     ) {
         log.info("Request to add booking {}", bookingInputDto);

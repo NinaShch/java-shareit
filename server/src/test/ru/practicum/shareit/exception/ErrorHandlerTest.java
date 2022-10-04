@@ -3,8 +3,6 @@ package ru.practicum.shareit.exception;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.bind.MissingRequestHeaderException;
 
-import javax.validation.ValidationException;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
@@ -53,11 +51,4 @@ public class ErrorHandlerTest {
         assertEquals("wrong message", "message", errorResponse.getError());
     }
 
-    @Test
-    public void handleValidationException() {
-        ErrorResponse errorResponse = underTest.handleValidationException(
-                new ValidationException("message")
-        );
-        assertEquals("wrong message", "message", errorResponse.getError());
-    }
 }
